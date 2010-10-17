@@ -17,6 +17,8 @@
 #ifndef _LOGPRINT_H
 #define _LOGPRINT_H
 
+#include <stdbool.h>
+
 #include <cutils/log.h>
 #include <cutils/logger.h>
 #include <cutils/event_tag_map.h>
@@ -57,6 +59,8 @@ void android_log_format_free(AndroidLogFormat *p_format);
 
 void android_log_setPrintFormat(AndroidLogFormat *p_format, 
         AndroidLogPrintFormat format);
+
+void android_log_setColoredOutput(AndroidLogFormat *p_format, bool colored_output);
 
 /**
  * Returns FORMAT_OFF on invalid string
