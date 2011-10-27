@@ -16,11 +16,8 @@
 */
 
 #include <stdio.h>
-<<<<<<< HEAD
 #include <stdlib.h>
 #include <unistd.h>
-=======
->>>>>>> remotes/aosp/gingerbread
 #include <errno.h>
 #include <signal.h>
 #include <pthread.h>
@@ -36,17 +33,13 @@
 
 #include <cutils/sockets.h>
 #include <cutils/logd.h>
-<<<<<<< HEAD
 #include <cutils/sockets.h>
-=======
->>>>>>> remotes/aosp/gingerbread
 #include <cutils/properties.h>
 
 #include <linux/input.h>
 
 #include <private/android_filesystem_config.h>
 
-<<<<<<< HEAD
 #include "utility.h"
 
 #ifdef WITH_VFP
@@ -65,21 +58,12 @@ extern int unwind_backtrace_with_ptrace(int tfd, pid_t pid, mapinfo *map,
 
 static int logsocket = -1;
 
-=======
-#include "debuggerd.h"
-#include "utility.h"
-
->>>>>>> remotes/aosp/gingerbread
 #define ANDROID_LOG_INFO 4
 
 /* Log information onto the tombstone */
 void _LOG(int tfd, bool in_tombstone_only, const char *fmt, ...)
 {
-<<<<<<< HEAD
-    char buf[128];
-=======
     char buf[512];
->>>>>>> remotes/aosp/gingerbread
 
     va_list ap;
     va_start(ap, fmt);
@@ -95,7 +79,6 @@ void _LOG(int tfd, bool in_tombstone_only, const char *fmt, ...)
         __android_log_vprint(ANDROID_LOG_INFO, "DEBUG", fmt, ap);
 }
 
-<<<<<<< HEAD
 #define LOG(fmt...) _LOG(-1, 0, fmt)
 #if 0
 #define XLOG(fmt...) _LOG(-1, 0, fmt)
@@ -103,8 +86,6 @@ void _LOG(int tfd, bool in_tombstone_only, const char *fmt, ...)
 #define XLOG(fmt...) do {} while(0)
 #endif
 
-=======
->>>>>>> remotes/aosp/gingerbread
 // 6f000000-6f01e000 rwxp 00000000 00:0c 16389419   /system/lib/libcomposer.so
 // 012345678901234567890123456789012345678901234567890123456789
 // 0         1         2         3         4         5
@@ -125,18 +106,11 @@ mapinfo *parse_maps_line(char *line)
 
     mi->start = strtoul(line, 0, 16);
     mi->end = strtoul(line + 9, 0, 16);
-<<<<<<< HEAD
-    /* To be filled in parse_exidx_info if the mapped section starts with
-     * elf_header
-     */
-    mi->exidx_start = mi->exidx_end = 0;
-=======
     /* To be filled in parse_elf_info if the mapped section starts with
      * elf_header
      */
     mi->exidx_start = mi->exidx_end = 0;
     mi->symbols = 0;
->>>>>>> remotes/aosp/gingerbread
     mi->next = 0;
     strcpy(mi->name, line + 49);
 
@@ -152,7 +126,6 @@ void dump_build_info(int tfd)
     _LOG(tfd, false, "Build fingerprint: '%s'\n", fingerprint);
 }
 
-<<<<<<< HEAD
 
 void dump_stack_and_code(int tfd, int pid, mapinfo *map,
                          int unwind_depth, unsigned int sp_list[],
@@ -333,8 +306,6 @@ void dump_registers(int tfd, int pid, bool at_fault)
 #endif
 }
 
-=======
->>>>>>> remotes/aosp/gingerbread
 const char *get_signame(int sig)
 {
     switch(sig) {
@@ -429,11 +400,7 @@ void dump_crash_banner(int tfd, unsigned pid, unsigned tid, int sig)
     if(sig) dump_fault_addr(tfd, tid, sig);
 }
 
-<<<<<<< HEAD
-static void parse_exidx_info(mapinfo *milist, pid_t pid)
-=======
 static void parse_elf_info(mapinfo *milist, pid_t pid)
->>>>>>> remotes/aosp/gingerbread
 {
     mapinfo *mi;
     for (mi = milist; mi != NULL; mi = mi->next) {
@@ -456,25 +423,16 @@ static void parse_elf_info(mapinfo *milist, pid_t pid)
                 /* Parse the program header */
                 get_remote_struct(pid, (char *) (ptr+i), &phdr,
                                   sizeof(Elf32_Phdr));
-<<<<<<< HEAD
-=======
-#ifdef __arm__
->>>>>>> remotes/aosp/gingerbread
                 /* Found a EXIDX segment? */
                 if (phdr.p_type == PT_ARM_EXIDX) {
                     mi->exidx_start = mi->start + phdr.p_offset;
                     mi->exidx_end = mi->exidx_start + phdr.p_filesz;
                     break;
                 }
-<<<<<<< HEAD
-            }
-=======
-#endif
             }
 
             /* Try to load symbols from this file */
             mi->symbols = symbol_table_create(mi->name);
->>>>>>> remotes/aosp/gingerbread
         }
     }
 }
@@ -486,13 +444,7 @@ void dump_crash_report(int tfd, unsigned pid, unsigned tid, bool at_fault)
     mapinfo *milist = 0;
     unsigned int sp_list[STACK_CONTENT_DEPTH];
     int stack_depth;
-<<<<<<< HEAD
     int frame0_pc_sane = 1;
-=======
-#ifdef __arm__
-    int frame0_pc_sane = 1;
-#endif
->>>>>>> remotes/aosp/gingerbread
 
     if (!at_fault) {
         _LOG(tfd, true,
@@ -518,14 +470,8 @@ void dump_crash_report(int tfd, unsigned pid, unsigned tid, bool at_fault)
         fclose(fp);
     }
 
-<<<<<<< HEAD
-    parse_exidx_info(milist, tid);
-
-=======
     parse_elf_info(milist, tid);
 
-#if __arm__
->>>>>>> remotes/aosp/gingerbread
     /* If stack unwinder fails, use the default solution to dump the stack
      * content.
      */
@@ -540,24 +486,10 @@ void dump_crash_report(int tfd, unsigned pid, unsigned tid, bool at_fault)
     }
 
     dump_stack_and_code(tfd, tid, milist, stack_depth, sp_list, at_fault);
-<<<<<<< HEAD
-
-    while(milist) {
-        mapinfo *next = milist->next;
-=======
-#elif __i386__
-    /* If stack unwinder fails, use the default solution to dump the stack
-    * content.
-    */
-    stack_depth = unwind_backtrace_with_ptrace_x86(tfd, tid, milist,at_fault);
-#else
-#error "Unsupported architecture"
-#endif
 
     while(milist) {
         mapinfo *next = milist->next;
         symbol_table_free(milist->symbols);
->>>>>>> remotes/aosp/gingerbread
         free(milist);
         milist = next;
     }
@@ -936,18 +868,10 @@ done:
     if(fd != -1) close(fd);
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> remotes/aosp/gingerbread
 int main()
 {
     int s;
     struct sigaction act;
-<<<<<<< HEAD
-=======
-    int logsocket = -1;
->>>>>>> remotes/aosp/gingerbread
 
     logsocket = socket_local_client("logd",
             ANDROID_SOCKET_NAMESPACE_ABSTRACT, SOCK_DGRAM);
