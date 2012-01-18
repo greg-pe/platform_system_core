@@ -215,8 +215,6 @@ enum {
      *
      */
     NATIVE_WINDOW_TRANSFORM_HINT = 8,
-
-    NATIVE_WINDOW_NUM_BUFFERS = 9,
 };
 
 /* valid operations for the (*perform)() hook */
