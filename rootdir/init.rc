@@ -510,6 +510,10 @@ service dumpstate /system/bin/dumpstate -s
     disabled
     oneshot
 
+# Execute files in /etc/init.d before booting
+service sysinit /system/xbin/busybox run-parts /system/etc/init.d
+    oneshot
+
 # adb over network
 on property:service.adb.tcp.port=5555
     stop adbd
