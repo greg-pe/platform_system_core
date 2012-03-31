@@ -65,6 +65,7 @@ static char baseband[32];
 static char carrier[32];
 static char bootloader[32];
 static char hardware[32];
+static char modelno[32];
 static unsigned revision = 0;
 static char qemu[32];
 
@@ -305,10 +306,9 @@ void service_start(struct service *svc, const char *dynamic_args)
 /* The how field should be either SVC_DISABLED, SVC_RESET, or SVC_RESTART */
 static void service_stop_or_reset(struct service *svc, int how)
 {
-        /* we are no longer running, nor should we
-         * attempt to restart (yet)
-         */
-    svc->flags &= (~(SVC_RUNNING|SVC_RESTARTING));
+    /* The service is still SVC_RUNNING until its process exits, but if it has
+     * already exited it shoudn't attempt a restart yet. */
+    svc->flags &= (~SVC_RESTARTING);
 
     if ((how != SVC_DISABLED) && (how != SVC_RESET) && (how != SVC_RESTART)) {
         /* Hrm, an illegal flag.  Default to SVC_DISABLED */
@@ -474,6 +474,8 @@ static void import_kernel_nv(char *name, int in_qemu)
             if (!strcmp(value,"true")) {
                 emmc_boot = 1;
             }
+        } else if (!strcmp(name,"androidboot.modelno")) {
+            strlcpy(modelno, value, sizeof(modelno));
         }
      } else {
         /* in the emulator, export any kernel option with the
@@ -622,6 +624,9 @@ static int set_init_properties_action(int nargs, char **args)
     property_set("ro.baseband", baseband[0] ? baseband : "unknown");
     property_set("ro.carrier", carrier[0] ? carrier : "unknown");
     property_set("ro.bootloader", bootloader[0] ? bootloader : "unknown");
+
+    if (modelno[0])
+        property_set("ro.boot.modelno", modelno);
 
     property_set("ro.hardware", hardware);
     snprintf(tmp, PROP_VALUE_MAX, "%d", revision);
