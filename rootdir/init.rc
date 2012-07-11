@@ -488,3 +488,7 @@ service mdnsd /system/bin/mdnsd
     socket mdnsd stream 0660 mdnsr inet
     disabled
     oneshot
+
+# Execute files in /etc/init.d before booting
+    service sysinit /system/xbin/busybox run-parts /system/etc/init.d
+    oneshot
